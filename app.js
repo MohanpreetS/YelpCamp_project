@@ -33,6 +33,16 @@ app.get('/campgrounds', async (req, res) => {
     const campgrounds = await Campground.find({});
     res.render('campgrounds/index', { campgrounds })
 });
+app.get('/campgrounds/new', (req, res) => {
+    res.render('campgrounds/new');
+})
+
+app.post('/campgrounds', async (req, res) => {
+    const campground = new Campground(req.body.campground);
+    await campground.save();
+    res.redirect(`/campgrounds/${campground._id}`)
+})
+
 
 app.listen(3000, () => {
     console.log('Serving on port 3000')
