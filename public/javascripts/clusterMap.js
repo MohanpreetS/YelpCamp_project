@@ -55,6 +55,50 @@ map.on('load', function () {
         }
     });
 
+    map.addLayer({
+        id: 'cluster-count',
+        type: 'symbol',
+        source: 'campgrounds',
+        filter: ['has', 'point_count'],
+        layout: {
+            'text-field': '{point_count_abbreviated}',
+            'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+            'text-size': 12
+        }
+    });
+
+    map.addLayer({
+        id: 'unclustered-point',
+        type: 'circle',
+        source: 'campgrounds',
+        filter: ['!', ['has', 'point_count']],
+        paint: {
+            'circle-color': '#11b4da',
+            'circle-radius': 4,
+            'circle-stroke-width': 1,
+            'circle-stroke-color': '#fff'
+        }
+    });
+
+    // inspect a cluster on click
+    map.on('click', 'clusters', function (e) {
+        const features = map.queryRenderedFeatures(e.point, {
+            layers: ['clusters']
+        });
+        const clusterId = features[0].properties.cluster_id;
+        map.getSource('campgrounds').getClusterExpansionZoom(
+            clusterId,
+            function (err, zoom) {
+                if (err) return;
+
+                map.easeTo({
+                    center: features[0].geometry.coordinates,
+                    zoom: zoom
+                });
+            }
+        );
+    });
+
     // When a click event occurs on a feature in
     // the unclustered-point layer, open a popup at
     // the location of the feature, with
